@@ -14,10 +14,9 @@ create table #FlyTable00
 	合理损耗下限 decimal(10,2),
 	结果 varchar(10),
 	超标准损耗重量 decimal(26,6),
-	一次通过率 decimal(10,2),
+	一次通过率 decimal(20,2),
 	标准单价 decimal(20,2),
-	损耗金额  decimal(20,2),
-	大类 varchar(12)
+	损耗金额  decimal(20,2)
 )
 create table #FlyTable01
 (
@@ -31,7 +30,7 @@ create table #FlyTable01
 	合理损耗下限 decimal(10,2),
 	结果 varchar(10),
 	超标准损耗重量 decimal(26,6),
-	一次通过率 decimal(10,2),
+	一次通过率 decimal(20,2),
 	标准单价 decimal(20,2),
 	损耗金额  decimal(20,2)
 )
@@ -47,7 +46,7 @@ create table #FlyTable02
 	合理损耗下限 decimal(10,2),
 	结果 varchar(10),
 	超标准损耗重量 decimal(26,6),
-	一次通过率 decimal(10,2),
+	一次通过率 decimal(20,2),
 	标准单价 decimal(20,2),
 	损耗金额  decimal(20,2)
 )
@@ -56,7 +55,7 @@ set @SQL = '
 insert into #FlyTable00 select
 rdrecords10.cdefine22 as 任务号,
 0 as 领用原料重量,
-(case
+sum(case
 	when (Inventory.cComUnitCode = ''001'') then rdrecords10.iquantity
 	when (Inventory.cComUnitCode <> ''001'') then ((rdrecords10.iquantity * Inventory.iInvWeight)/1000)
 end) as 产出入库重量,
@@ -67,10 +66,12 @@ end) as 产出入库重量,
 0 as 合理损耗下限,
 '''' as 结果,
 0 as 超标准损耗重量,
-0 as 一次通过率,
+sum(case 
+	when ((Inventory.cInvCCode LIKE ''05%'' AND Inventory.cInvCCode NOT LIKE ''0596%'' AND Inventory.cInvCCode NOT LIKE ''0597%'' AND Inventory.cInvCCode NOT LIKE ''0598%'' AND Inventory.cInvCCode NOT LIKE ''0599%'') OR Inventory.cInvCCode LIKE ''07%'') then (case when (Inventory.cComUnitCode = ''001'') then rdrecords10.iquantity		when (Inventory.cComUnitCode <> ''001'') then ((rdrecords10.iquantity * Inventory.iInvWeight)/1000) end)
+	when ((Inventory.cInvCCode NOT LIKE ''05%'' AND Inventory.cInvCCode NOT LIKE ''07%'') OR Inventory.cInvCCode LIKE ''0596%'' OR Inventory.cInvCCode LIKE ''0597%'' OR Inventory.cInvCCode LIKE ''0598%'' OR Inventory.cInvCCode LIKE ''0599%'') then 0
+end) as 一次通过率,
 0 as 标准单价,
-0 as 损耗金额,
-Inventory.cInvCCode as 大类
+0 as 损耗金额
 from rdrecords10
 Left JOIN rdrecord10 ON rdrecords10.ID = rdrecord10.ID
 Left JOIN Inventory ON rdrecords10.cInvCode = Inventory.cInvCode
@@ -83,6 +84,7 @@ if(isnull(@dDate_end,'')<>'')
 begin
 set @SQL = @SQL + 'AND (rdrecord10.dDate <= '''+@dDate_end+''') '
 end
+@SQL = @SQL + ' group by rdrecords10.cdefine22'
 exec (@SQL)
 --查询成品入库数据结束------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --查询材料出库数据开始------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -99,7 +101,7 @@ end) as 领用原料重量,
 (case when (isnull(rdrecord11.cPsPcode,'') = '') then 0.00
      when (isnull(rdrecord11.cPsPcode,'') <> '') then CAST(((1.00 - CAST(isnull(rdrecord11.cdefine9,'1') as decimal(20,2)))*100) as decimal(20,2))
 end) as 合理损耗上限,
-(case when (isnull(rdrecord11.cPsPcode,'') = '') then 100.00
+(case when (isnull(rdrecord11.cPsPcode,'') = '') then 0.00
      when (isnull(rdrecord11.cPsPcode,'') <> '') then CAST(((1.00 - CAST(isnull(rdrecord11.cdefine2,'1') as decimal(20,2)))*100) as decimal(20,2))
 end) as 合理损耗下限,
 '' as 结果,
@@ -117,15 +119,15 @@ insert into #FlyTable02
 select 
 #FlyTable01.任务号,
 sum(#FlyTable01.领用原料重量) as 领用原料重量,
-sum(#FlyTable00.产出入库重量) as 产出入库重量,
-(sum(#FlyTable01.领用原料重量)-sum(#FlyTable00.产出入库重量)) as 损耗重量,
-CAST(((sum(#FlyTable00.产出入库重量)/sum(#FlyTable01.领用原料重量))*100) as decimal(20,2)) as 出成率,
-CAST(((1-(sum(#FlyTable00.产出入库重量)/sum(#FlyTable01.领用原料重量)))*100) as decimal(20,2)) as 损耗率,
+max(#FlyTable00.产出入库重量) as 产出入库重量,
+(sum(#FlyTable01.领用原料重量)-max(#FlyTable00.产出入库重量)) as 损耗重量,
+CAST(((max(#FlyTable00.产出入库重量)/sum(#FlyTable01.领用原料重量))*100) as decimal(20,2)) as 出成率,
+CAST(((1-(max(#FlyTable00.产出入库重量)/sum(#FlyTable01.领用原料重量)))*100) as decimal(20,2)) as 损耗率,
 max(#FlyTable01.合理损耗上限) as 合理损耗上限,
 max(#FlyTable01.合理损耗下限) as 合理损耗下限,
 '' as 结果,
 0 as 超标准损耗重量,
-CAST(((sum(case when ((#FlyTable00.大类 LIKE '05%' AND #FlyTable00.大类 NOT LIKE '0596%' AND #FlyTable00.大类 NOT LIKE '0597%' AND #FlyTable00.大类 NOT LIKE '0598%' AND #FlyTable00.大类 NOT LIKE '0599%') OR #FlyTable00.大类 LIKE '07%') then #FlyTable00.产出入库重量 when ((#FlyTable00.大类 NOT LIKE '05%' AND #FlyTable00.大类 NOT LIKE '07%') OR #FlyTable00.大类 LIKE '0596%' OR #FlyTable00.大类 LIKE '0597%' OR #FlyTable00.大类 LIKE '0598%' OR #FlyTable00.大类 LIKE '0599%') then 0 end)/sum(#FlyTable01.领用原料重量))*100) as decimal(20,2)) as 一次通过率,
+CAST(   ((max(#FlyTable00.一次通过率)/sum(#FlyTable01.领用原料重量))*100) as decimal(20,2)   ) as 一次通过率,
 0 as 标准单价,
 0 as 损耗金额
 from #FlyTable01 Left JOIN #FlyTable00 ON #FlyTable01.任务号 = #FlyTable00.任务号

@@ -36,12 +36,13 @@ create table #FlyTable02
 (
 	任务号 varchar(50),产品编码 varchar(50),产品名称 varchar(50),产品规格 varchar(50),
 	领用原料重量 decimal(26,6),
+	明细入库重量 decimal(26,6),
 	产出入库重量 decimal(26,6),
 	一次通过重量 decimal(26,6),
 	损耗重量 decimal(26,6),
 	出成率 decimal(20,6),
 	损耗率 decimal(20,6),
-  合理损耗上限 decimal(20,6),
+	合理损耗上限 decimal(20,6),
 	合理损耗下限 decimal(20,6),
 	结果 varchar(10),
 	超标准损耗重量 decimal(26,6),
@@ -109,7 +110,7 @@ where rdrecord11.cDefine1 in (select 任务号 from #FlyTable0) and isnull(rdrec
 --计算任务号对应合理损耗率结束
 --中间计算开始------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 insert into #FlyTable02 
-SELECT LT0.任务号 as 任务号,LT0.产品编码 as 产品编码,LT0.产品名称 as 产品名称,LT0.产品规格 as 产品规格,LT1.领用原料重量 as 领用原料重量,LT0.产出入库重量 as 产出入库重量,LT0.一次通过重量 as 一次通过重量,
+SELECT LT0.任务号 as 任务号,LT0.产品编码 as 产品编码,LT0.产品名称 as 产品名称,LT0.产品规格 as 产品规格,LT1.领用原料重量 as 领用原料重量,LT0.明细入库重量 as 明细入库重量,LT0.产出入库重量 as 产出入库重量,LT0.一次通过重量 as 一次通过重量,
 			(LT1.领用原料重量-LT0.产出入库重量) as 损耗重量, CAST((cast(LT0.产出入库重量/LT1.领用原料重量 as decimal(20,6))*100) as decimal(20,2)) as 出成率,
 			isnull(CAST((1-CAST(((LT0.产出入库重量/LT1.领用原料重量)) as decimal(20,6)))*100 as decimal(20,2)),0) as 损耗率,
 			isnull(LT2.合理损耗上限,0) as 合理损耗上限,isnull(LT2.合理损耗下限,0) as 合理损耗下限,
@@ -117,9 +118,13 @@ SELECT LT0.任务号 as 任务号,LT0.产品编码 as 产品编码,LT0.产品名
 		0 as 标准单价,
 		0 as 损耗金额
 FROM (
-select #FlyTable00.任务号 as 任务号,#FlyTable00.产品编码 as 产品编码,#FlyTable00.产品名称 as 产品名称,#FlyTable00.产品规格 as 产品规格,sum(#FlyTable00.产出入库重量) as 产出入库重量,sum(#FlyTable00.一次通过重量) as 一次通过重量
+select #FlyTable00.任务号 as 任务号,#FlyTable00.产品编码 as 产品编码,#FlyTable00.产品名称 as 产品名称,#FlyTable00.产品规格 as 产品规格,
+sum(#FlyTable00.产出入库重量) over(partition by #FlyTable00.任务号,#FlyTable00.产品编码 ,#FlyTable00.产品名称,#FlyTable00.产品规格) as 明细入库重量,
+sum(#FlyTable00.产出入库重量) over(partition by #FlyTable00.任务号) as 产出入库重量,
+sum(#FlyTable00.一次通过重量) over(partition by #FlyTable00.任务号) as 一次通过重量
 from #FlyTable00 
-group by #FlyTable00.任务号,#FlyTable00.产品编码 ,#FlyTable00.产品名称,#FlyTable00.产品规格) AS LT0
+--group by #FlyTable00.任务号,#FlyTable00.产品编码 ,#FlyTable00.产品名称,#FlyTable00.产品规格
+) AS LT0
 left join (
 select #FlyTable01.任务号 as 任务号,
 sum(#FlyTable01.领用原料重量) as 领用原料重量
@@ -136,10 +141,11 @@ where LT1.领用原料重量 <> 0
 
 --中间计算结束------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-select 
+select distinct
 	任务号,
 产品编码,产品名称,产品规格,
 	领用原料重量,
+	明细入库重量,
 	产出入库重量,
 	损耗重量,
 	出成率,
@@ -172,8 +178,6 @@ drop table #FlyTable011
 drop table #FlyTable02
 
 END
-
-
 
 GO
 SET QUOTED_IDENTIFIER OFF 

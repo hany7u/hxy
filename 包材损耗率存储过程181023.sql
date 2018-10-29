@@ -1,8 +1,3 @@
-SET QUOTED_IDENTIFIER ON 
-GO
-SET ANSI_NULLS ON 
-GO
-
 --weiDu 统计维度，输入0表示按照任务号统计，输入1表示按物料、任务单号统计，并按物料汇总
 ALTER        PROCEDURE [dbo].[fly_baoCaiSunHaoLv] @weiDu int
 	,@dDate_start varchar(100)
@@ -21,7 +16,7 @@ BEGIN
 		,产品编码 varchar(50)
 		,产品名称 varchar(50)
 		,规格型号 varchar(50)
-		,产出入库重量 decimal(26, 6)
+		,产出入库数量 decimal(26, 6)
 		)
 	create table #FlyTable010 (
 		任务号 varchar(50)
@@ -100,10 +95,10 @@ BEGIN
 	--查询产品入库数据开始-------------------------
 	insert into #FlyTable00 select
 				rdrecords10.cdefine22 as 任务号,
-				Inventory.cInvCode as 产品编码,
+				/*Inventory.cInvCode as 产品编码,
 				Inventory.cInvName as 产品名称,
-				Inventory.cInvStd as 规格型号,
-				rdrecords10.iquantity as 产出入库重量
+				Inventory.cInvStd as 规格型号,*/
+				rdrecords10.iquantity as 产出入库数量
 				from rdrecords10
 				Left JOIN rdrecord10 ON rdrecords10.ID = rdrecord10.ID
 				Left JOIN Inventory ON rdrecords10.cInvCode = Inventory.cInvCode
@@ -142,33 +137,33 @@ BEGIN
 	--查询任务单号对应的合理损耗上下限结束
 	--查询结果表开始
 	select t0.任务号 as 任务号,T1.产品编码 as 产品编码,T1.产品名称 as 产品名称,T1.规格型号 as 产品规格, T11.材料编码 as 材料编码,T11.材料名称 as 材料名称,T11.规格型号 as 规格型号,T11.计量单位 as 计量单位,
-			T1.产出入库重量 as 产出入库重量,T11.实际消耗数量 as 实际消耗数量,T2.合理损耗上限 AS 合理损耗上限,T2.合理损耗下限 AS 合理损耗下限,
+			T1.产出入库数量 as 产出入库数量,T11.实际消耗数量 as 实际消耗数量,T2.合理损耗上限 AS 合理损耗上限,T2.合理损耗下限 AS 合理损耗下限,
 			cast(T2.基本用量 as decimal(20,4)) AS 基本用量,cast(T2.基础数量 as decimal(20,4)) AS 基础数量,
-			case when cast(T2.基础数量 as decimal(20,6))<>0  then cast(T1.产出入库重量*T2.基本用量/T2.基础数量 as decimal(20,2)) end  as 标准消耗数量,
-			case when cast(T2.基础数量 as decimal(20,6))<>0  then cast(T11.实际消耗数量-cast(T1.产出入库重量*T2.基本用量/T2.基础数量 as decimal(20,6)) as decimal(20,2)) end  as 损耗数量,
-			case when cast(T2.基础数量 as decimal(20,6))<>0 and cast(T11.实际消耗数量 as decimal(20,6))<>0 then cast(((T11.实际消耗数量-cast(T1.产出入库重量*T2.基本用量/T2.基础数量 as decimal(20,6)))/T11.实际消耗数量)*100 as decimal(20,2)) end  as 损耗率,
+			case when cast(T2.基础数量 as decimal(20,6))<>0  then cast(T1.产出入库数量*T2.基本用量/T2.基础数量 as decimal(20,2)) end  as 标准消耗数量,
+			case when cast(T2.基础数量 as decimal(20,6))<>0  then cast(T11.实际消耗数量-cast(T1.产出入库数量*T2.基本用量/T2.基础数量 as decimal(20,6)) as decimal(20,2)) end  as 损耗数量,
+			case when cast(T2.基础数量 as decimal(20,6))<>0 and cast(T11.实际消耗数量 as decimal(20,6))<>0 then cast(((T11.实际消耗数量-cast(T1.产出入库数量*T2.基本用量/T2.基础数量 as decimal(20,6)))/T11.实际消耗数量)*100 as decimal(20,2)) end  as 损耗率,
 			case 
-				when cast(T2.基础数量 as decimal(20,6))<>0 and cast(T11.实际消耗数量 as decimal(20,6))<>0 and cast(((T11.实际消耗数量-cast(T1.产出入库重量*T2.基本用量/T2.基础数量 as decimal(20,6)))/T11.实际消耗数量) as decimal(20,6)) >= T2.合理损耗下限 and cast(((T11.实际消耗数量-cast(T1.产出入库重量*T2.基本用量/T2.基础数量 as decimal(20,6)))/T11.实际消耗数量) as decimal(20,6)) <= T2.合理损耗上限
+				when cast(T2.基础数量 as decimal(20,6))<>0 and cast(T11.实际消耗数量 as decimal(20,6))<>0 and cast(((T11.实际消耗数量-cast(T1.产出入库数量*T2.基本用量/T2.基础数量 as decimal(20,6)))/T11.实际消耗数量) as decimal(20,6)) >= T2.合理损耗下限 and cast(((T11.实际消耗数量-cast(T1.产出入库数量*T2.基本用量/T2.基础数量 as decimal(20,6)))/T11.实际消耗数量) as decimal(20,6)) <= T2.合理损耗上限
 					then '合理'
-				when cast(T2.基础数量 as decimal(20,6))<>0 and cast(T11.实际消耗数量 as decimal(20,6))<>0 and cast(((T11.实际消耗数量-cast(T1.产出入库重量*T2.基本用量/T2.基础数量 as decimal(20,6)))/T11.实际消耗数量) as decimal(20,6)) > T2.合理损耗上限
+				when cast(T2.基础数量 as decimal(20,6))<>0 and cast(T11.实际消耗数量 as decimal(20,6))<>0 and cast(((T11.实际消耗数量-cast(T1.产出入库数量*T2.基本用量/T2.基础数量 as decimal(20,6)))/T11.实际消耗数量) as decimal(20,6)) > T2.合理损耗上限
 					then '浪费'
-				when cast(T2.基础数量 as decimal(20,6))<>0 and cast(T11.实际消耗数量 as decimal(20,6))<>0 and cast(((T11.实际消耗数量-cast(T1.产出入库重量*T2.基本用量/T2.基础数量 as decimal(20,6)))/T11.实际消耗数量) as decimal(20,6)) < T2.合理损耗下限
+				when cast(T2.基础数量 as decimal(20,6))<>0 and cast(T11.实际消耗数量 as decimal(20,6))<>0 and cast(((T11.实际消耗数量-cast(T1.产出入库数量*T2.基本用量/T2.基础数量 as decimal(20,6)))/T11.实际消耗数量) as decimal(20,6)) < T2.合理损耗下限
 					then '节约'
 			end as 结果,
 			case 
-				when cast(T2.基础数量 as decimal(20,6))<>0 and cast(T11.实际消耗数量 as decimal(20,6))<>0 and cast(((T11.实际消耗数量-cast(T1.产出入库重量*T2.基本用量/T2.基础数量 as decimal(20,6)))/T11.实际消耗数量) as decimal(20,6)) >= T2.合理损耗下限 and cast(((T11.实际消耗数量-cast(T1.产出入库重量*T2.基本用量/T2.基础数量 as decimal(20,6)))/T11.实际消耗数量) as decimal(20,6)) <= T2.合理损耗上限
+				when cast(T2.基础数量 as decimal(20,6))<>0 and cast(T11.实际消耗数量 as decimal(20,6))<>0 and cast(((T11.实际消耗数量-cast(T1.产出入库数量*T2.基本用量/T2.基础数量 as decimal(20,6)))/T11.实际消耗数量) as decimal(20,6)) >= T2.合理损耗下限 and cast(((T11.实际消耗数量-cast(T1.产出入库数量*T2.基本用量/T2.基础数量 as decimal(20,6)))/T11.实际消耗数量) as decimal(20,6)) <= T2.合理损耗上限
 					then 0.00
-				when cast(T2.基础数量 as decimal(20,6))<>0 and cast(T11.实际消耗数量 as decimal(20,6))<>0 and cast(((T11.实际消耗数量-cast(T1.产出入库重量*T2.基本用量/T2.基础数量 as decimal(20,6)))/T11.实际消耗数量) as decimal(20,6)) > T2.合理损耗上限
-					then cast((cast(T11.实际消耗数量-cast(T1.产出入库重量*T2.基本用量/T2.基础数量 as decimal(20,6)) as decimal(20,6))-cast(T1.产出入库重量*T2.基本用量/T2.基础数量*T2.合理损耗上限 as decimal(20,6))) as decimal(20,2))
-				when cast(T2.基础数量 as decimal(20,6))<>0 and cast(T11.实际消耗数量 as decimal(20,6))<>0 and cast(((T11.实际消耗数量-cast(T1.产出入库重量*T2.基本用量/T2.基础数量 as decimal(20,6)))/T11.实际消耗数量) as decimal(20,6)) < T2.合理损耗下限
-					then cast((cast(T11.实际消耗数量-cast(T1.产出入库重量*T2.基本用量/T2.基础数量 as decimal(20,6)) as decimal(20,6))-cast(T1.产出入库重量*T2.基本用量/T2.基础数量*T2.合理损耗下限 as decimal(20,6))) as decimal(20,2))
+				when cast(T2.基础数量 as decimal(20,6))<>0 and cast(T11.实际消耗数量 as decimal(20,6))<>0 and cast(((T11.实际消耗数量-cast(T1.产出入库数量*T2.基本用量/T2.基础数量 as decimal(20,6)))/T11.实际消耗数量) as decimal(20,6)) > T2.合理损耗上限
+					then cast((cast(T11.实际消耗数量-cast(T1.产出入库数量*T2.基本用量/T2.基础数量 as decimal(20,6)) as decimal(20,6))-cast(T1.产出入库数量*T2.基本用量/T2.基础数量*T2.合理损耗上限 as decimal(20,6))) as decimal(20,2))
+				when cast(T2.基础数量 as decimal(20,6))<>0 and cast(T11.实际消耗数量 as decimal(20,6))<>0 and cast(((T11.实际消耗数量-cast(T1.产出入库数量*T2.基本用量/T2.基础数量 as decimal(20,6)))/T11.实际消耗数量) as decimal(20,6)) < T2.合理损耗下限
+					then cast((cast(T11.实际消耗数量-cast(T1.产出入库数量*T2.基本用量/T2.基础数量 as decimal(20,6)) as decimal(20,6))-cast(T1.产出入库数量*T2.基本用量/T2.基础数量*T2.合理损耗下限 as decimal(20,6))) as decimal(20,2))
 			end as 超标准损耗数量
 		,'-' as 基准价格
 		,'-' as 超标准损耗金额
 	from(select DISTINCT #FlyTable0.任务号 AS 任务号 from #FlyTable0) as T0
-	left join (select DISTINCT #FlyTable00.任务号 as 任务号,#FlyTable00.产品编码 as 产品编码,#FlyTable00.产品名称 as 产品名称,#FlyTable00.规格型号 as 规格型号,sum(#FlyTable00.产出入库重量) as 产出入库重量 
+	left join (select DISTINCT #FlyTable00.任务号 as 任务号/*,#FlyTable00.产品编码 as 产品编码,#FlyTable00.产品名称 as 产品名称,#FlyTable00.规格型号 as 规格型号*/,sum(#FlyTable00.产出入库数量) as 产出入库数量 
 				from #FlyTable00
-				group by #FlyTable00.任务号,#FlyTable00.产品编码,#FlyTable00.产品名称,#FlyTable00.规格型号
+				group by #FlyTable00.任务号--,#FlyTable00.产品编码,#FlyTable00.产品名称,#FlyTable00.规格型号
 			) as T1 on T0.任务号 = T1.任务号
 	left join (select DISTINCT #FlyTable01.任务号 as 任务号,#FlyTable01.材料编码 as 材料编码,#FlyTable01.材料名称 as 材料名称,
 					#FlyTable01.规格型号 as 规格型号,#FlyTable01.计量单位 as 计量单位,SUM(#FlyTable01.实际消耗数量) as 实际消耗数量 
@@ -193,14 +188,4 @@ BEGIN
 	drop table #FlyTable010
 END
 
-
-
-
-
-
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON 
-GO
 

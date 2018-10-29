@@ -1,7 +1,3 @@
-SET QUOTED_IDENTIFIER ON 
-GO
-SET ANSI_NULLS ON 
-GO
 
 ALTER     PROCEDURE [dbo].[fly_chuChengLv] @dDate_start varchar(10),@dDate_end varchar(10)
 AS
@@ -9,51 +5,51 @@ DECLARE @SQL VARCHAR(4000)
 BEGIN
 create table #FlyTable0
 (
-	ä»»åŠ¡å· varchar(50)
+	ÈÎÎñºÅ varchar(50)
 )
 create table #FlyTable00
 (
-	ä»»åŠ¡å· varchar(50),
-	äº§å“ç¼–ç  varchar(50),
-	äº§å“åç§° varchar(50),
-	äº§å“è§„æ ¼ varchar(50),
-	äº§å‡ºå…¥åº“é‡é‡ decimal(26,6),
-	ä¸€æ¬¡é€šè¿‡é‡é‡ decimal(26,6)
+	ÈÎÎñºÅ varchar(50),
+	²úÆ·±àÂë varchar(50),
+	²úÆ·Ãû³Æ varchar(50),
+	²úÆ·¹æ¸ñ varchar(50),
+	²ú³öÈë¿âÖØÁ¿ decimal(26,6),
+	Ò»´ÎÍ¨¹ıÖØÁ¿ decimal(26,6)
 )
 create table #FlyTable01
 (
-	ä»»åŠ¡å· varchar(50),
-	é¢†ç”¨åŸæ–™é‡é‡ decimal(26,6)
+	ÈÎÎñºÅ varchar(50),
+	ÁìÓÃÔ­ÁÏÖØÁ¿ decimal(26,6)
 )
 create table #FlyTable011
 (
-	ä»»åŠ¡å· varchar(50),
-	åˆç†æŸè€—ä¸Šé™ decimal(20,6),
-	åˆç†æŸè€—ä¸‹é™ decimal(20,6)
+	ÈÎÎñºÅ varchar(50),
+	ºÏÀíËğºÄÉÏÏŞ decimal(20,6),
+	ºÏÀíËğºÄÏÂÏŞ decimal(20,6)
 )
 
 create table #FlyTable02
 (
-	ä»»åŠ¡å· varchar(50),äº§å“ç¼–ç  varchar(50),äº§å“åç§° varchar(50),äº§å“è§„æ ¼ varchar(50),
-	é¢†ç”¨åŸæ–™é‡é‡ decimal(26,6),
-	æ˜ç»†å…¥åº“é‡é‡ decimal(26,6),
-	äº§å‡ºå…¥åº“é‡é‡ decimal(26,6),
-	ä¸€æ¬¡é€šè¿‡é‡é‡ decimal(26,6),
-	æŸè€—é‡é‡ decimal(26,6),
-	å‡ºæˆç‡ decimal(20,6),
-	æŸè€—ç‡ decimal(20,6),
-	åˆç†æŸè€—ä¸Šé™ decimal(20,6),
-	åˆç†æŸè€—ä¸‹é™ decimal(20,6),
-	ç»“æœ varchar(10),
-	è¶…æ ‡å‡†æŸè€—é‡é‡ decimal(26,6),
-	ä¸€æ¬¡é€šè¿‡ç‡ decimal(20,6),
-	æ ‡å‡†å•ä»· decimal(20,2),
-	æŸè€—é‡‘é¢  decimal(20,2)
+	ÈÎÎñºÅ varchar(50),²úÆ·±àÂë varchar(50),²úÆ·Ãû³Æ varchar(50),²úÆ·¹æ¸ñ varchar(50),
+	ÁìÓÃÔ­ÁÏÖØÁ¿ decimal(26,6),
+	Ã÷Ï¸Èë¿âÖØÁ¿ decimal(26,6),
+	²ú³öÈë¿âÖØÁ¿ decimal(26,6),
+	Ò»´ÎÍ¨¹ıÖØÁ¿ decimal(26,6),
+	ËğºÄÖØÁ¿ decimal(26,6),
+	³ö³ÉÂÊ decimal(20,6),
+	ËğºÄÂÊ decimal(20,6),
+	ºÏÀíËğºÄÉÏÏŞ decimal(20,6),
+	ºÏÀíËğºÄÏÂÏŞ decimal(20,6),
+	½á¹û varchar(10),
+	³¬±ê×¼ËğºÄÖØÁ¿ decimal(26,6),
+	Ò»´ÎÍ¨¹ıÂÊ decimal(20,6),
+	±ê×¼µ¥¼Û decimal(20,2),
+	ËğºÄ½ğ¶î  decimal(20,2)
 )
---æŸ¥è¯¢ä»»åŠ¡å·å¼€å§‹------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--²éÑ¯ÈÎÎñºÅ¿ªÊ¼------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 set @SQL = '
 insert into #FlyTable0 select
-rdrecords10.cdefine22 as ä»»åŠ¡å·
+rdrecords10.cdefine22 as ÈÎÎñºÅ
 from rdrecords10
 Left JOIN rdrecord10 ON rdrecords10.ID = rdrecord10.ID
 Left JOIN Inventory ON rdrecords10.cInvCode = Inventory.cInvCode
@@ -67,110 +63,118 @@ begin
 set @SQL = @SQL + 'AND (rdrecord10.dDate <= '''+@dDate_end+''') '
 end
 exec (@SQL)
---æŸ¥è¯¢ä»»åŠ¡å·ç»“æŸ-
---æŸ¥è¯¢æˆå“å…¥åº“æ•°æ®å¼€å§‹------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--²éÑ¯ÈÎÎñºÅ½áÊø-
+--²éÑ¯³ÉÆ·Èë¿âÊı¾İ¿ªÊ¼------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 insert into #FlyTable00 select
-rdrecords10.cdefine22 as ä»»åŠ¡å·,Inventory.cInvCode as äº§å“ç¼–ç ,
-				Inventory.cInvName as äº§å“åç§°,
-				Inventory.cInvStd as äº§å“è§„æ ¼,
+rdrecords10.cdefine22 as ÈÎÎñºÅ,Inventory.cInvCode as ²úÆ·±àÂë,
+				Inventory.cInvName as ²úÆ·Ãû³Æ,
+				Inventory.cInvStd as ²úÆ·¹æ¸ñ,
 (case
 	when (Inventory.cComUnitCode = '001') then rdrecords10.iquantity
 	when (Inventory.cComUnitCode <> '001') then ((rdrecords10.iquantity * Inventory.iInvWeight)/1000)
-end) as äº§å‡ºå…¥åº“é‡é‡,
+end) as ²ú³öÈë¿âÖØÁ¿,
 (case
 	when (Inventory.cComUnitCode = '001' and ((Inventory.cInvCCode LIKE '05%' AND Inventory.cInvCCode NOT LIKE '0596%' AND Inventory.cInvCCode NOT LIKE '0597%' AND Inventory.cInvCCode NOT LIKE '0598%' AND Inventory.cInvCCode NOT LIKE '0599%') OR Inventory.cInvCCode LIKE '07%')) then rdrecords10.iquantity
 	when (Inventory.cComUnitCode <> '001'and ((Inventory.cInvCCode LIKE '05%' AND Inventory.cInvCCode NOT LIKE '0596%' AND Inventory.cInvCCode NOT LIKE '0597%' AND Inventory.cInvCCode NOT LIKE '0598%' AND Inventory.cInvCCode NOT LIKE '0599%') OR Inventory.cInvCCode LIKE '07%')) then ((rdrecords10.iquantity * Inventory.iInvWeight)/1000)
-end) as ä¸€æ¬¡é€šè¿‡é‡é‡
+end) as Ò»´ÎÍ¨¹ıÖØÁ¿
 from rdrecords10
 Left JOIN rdrecord10 ON rdrecords10.ID = rdrecord10.ID
 Left JOIN Inventory ON rdrecords10.cInvCode = Inventory.cInvCode
-where (rdrecords10.cdefine22 in (select ä»»åŠ¡å· from #FlyTable0) and (Inventory.cInvCode like '05%' or Inventory.cInvCode like '07%')) 
---æŸ¥è¯¢æˆå“å…¥åº“æ•°æ®ç»“æŸ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---æŸ¥è¯¢ææ–™å‡ºåº“æ•°æ®å¼€å§‹------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+where (rdrecords10.cdefine22 in (select ÈÎÎñºÅ from #FlyTable0) and (Inventory.cInvCode like '05%' or Inventory.cInvCode like '07%')) 
+--²éÑ¯³ÉÆ·Èë¿âÊı¾İ½áÊø------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--²éÑ¯²ÄÁÏ³ö¿âÊı¾İ¿ªÊ¼------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 insert into #FlyTable01 select
-				rdrecord11.cDefine1 as ä»»åŠ¡å·,
+				rdrecord11.cDefine1 as ÈÎÎñºÅ,
 				
 (case
 	when (Inventory.cComUnitCode = '001') then rdrecords11.iquantity
 	when (Inventory.cComUnitCode <> '001') then ((rdrecords11.iquantity * Inventory.iInvWeight)/1000)
-end) as é¢†ç”¨åŸæ–™é‡é‡
+end) as ÁìÓÃÔ­ÁÏÖØÁ¿
 from rdrecords11
 Left JOIN rdrecord11 ON rdrecords11.ID = rdrecord11.ID
 Left JOIN Inventory ON rdrecords11.cInvCode = Inventory.cInvCode
-where rdrecord11.cDefine1 in (select ä»»åŠ¡å· from #FlyTable0) AND Inventory.cInvCCode NOT LIKE '02%'/*and isnull(rdrecord11.cPsPcode,'') <> ''*/
---æŸ¥è¯¢ææ–™å‡ºåº“æ•°æ®ç»“æŸ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---è®¡ç®—ä»»åŠ¡å·å¯¹åº”åˆç†æŸè€—ç‡å¼€å§‹
+where rdrecord11.cDefine1 in (select ÈÎÎñºÅ from #FlyTable0) AND Inventory.cInvCCode NOT LIKE '02%'/*and isnull(rdrecord11.cPsPcode,'') <> ''*/
+--²éÑ¯²ÄÁÏ³ö¿âÊı¾İ½áÊø------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--¼ÆËãÈÎÎñºÅ¶ÔÓ¦ºÏÀíËğºÄÂÊ¿ªÊ¼
 insert into #FlyTable011 select
-rdrecord11.cDefine1 as ä»»åŠ¡å·,
-CAST((1.00 - CAST(isnull(rdrecord11.cdefine9,'1') as decimal(20,6)))*100 as decimal(20,6)) as åˆç†æŸè€—ä¸Šé™,
-CAST((1.00 - CAST(isnull(rdrecord11.cdefine2,'1') as decimal(20,6)))*100 as decimal(20,6)) as åˆç†æŸè€—ä¸‹é™
+rdrecord11.cDefine1 as ÈÎÎñºÅ,
+CAST((1.00 - CAST(isnull(rdrecord11.cdefine9,'1') as decimal(20,6)))*100 as decimal(20,6)) as ºÏÀíËğºÄÉÏÏŞ,
+CAST((1.00 - CAST(isnull(rdrecord11.cdefine2,'1') as decimal(20,6)))*100 as decimal(20,6)) as ºÏÀíËğºÄÏÂÏŞ
 from rdrecords11
 Left JOIN rdrecord11 ON rdrecords11.ID = rdrecord11.ID
-where rdrecord11.cDefine1 in (select ä»»åŠ¡å· from #FlyTable0) and isnull(rdrecord11.cPsPcode,'') <> ''
---è®¡ç®—ä»»åŠ¡å·å¯¹åº”åˆç†æŸè€—ç‡ç»“æŸ
---ä¸­é—´è®¡ç®—å¼€å§‹------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+where rdrecord11.cDefine1 in (select ÈÎÎñºÅ from #FlyTable0) and isnull(rdrecord11.cPsPcode,'') <> ''
+--¼ÆËãÈÎÎñºÅ¶ÔÓ¦ºÏÀíËğºÄÂÊ½áÊø
+--ÖĞ¼ä¼ÆËã¿ªÊ¼------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 insert into #FlyTable02 
-SELECT LT0.ä»»åŠ¡å· as ä»»åŠ¡å·,LT0.äº§å“ç¼–ç  as äº§å“ç¼–ç ,LT0.äº§å“åç§° as äº§å“åç§°,LT0.äº§å“è§„æ ¼ as äº§å“è§„æ ¼,LT1.é¢†ç”¨åŸæ–™é‡é‡ as é¢†ç”¨åŸæ–™é‡é‡,LT0.æ˜ç»†å…¥åº“é‡é‡ as æ˜ç»†å…¥åº“é‡é‡,LT0.äº§å‡ºå…¥åº“é‡é‡ as äº§å‡ºå…¥åº“é‡é‡,LT0.ä¸€æ¬¡é€šè¿‡é‡é‡ as ä¸€æ¬¡é€šè¿‡é‡é‡,
-			(LT1.é¢†ç”¨åŸæ–™é‡é‡-LT0.äº§å‡ºå…¥åº“é‡é‡) as æŸè€—é‡é‡, CAST((cast(LT0.äº§å‡ºå…¥åº“é‡é‡/LT1.é¢†ç”¨åŸæ–™é‡é‡ as decimal(20,6))*100) as decimal(20,2)) as å‡ºæˆç‡,
-			isnull(CAST((1-CAST(((LT0.äº§å‡ºå…¥åº“é‡é‡/LT1.é¢†ç”¨åŸæ–™é‡é‡)) as decimal(20,6)))*100 as decimal(20,2)),0) as æŸè€—ç‡,
-			isnull(LT2.åˆç†æŸè€—ä¸Šé™,0) as åˆç†æŸè€—ä¸Šé™,isnull(LT2.åˆç†æŸè€—ä¸‹é™,0) as åˆç†æŸè€—ä¸‹é™,
-			'' as ç»“æœ,0 as è¶…æ ‡å‡†æŸè€—é‡é‡,CAST(((LT0.ä¸€æ¬¡é€šè¿‡é‡é‡/LT1.é¢†ç”¨åŸæ–™é‡é‡)*100) as decimal(20,2)) as ä¸€æ¬¡é€šè¿‡ç‡,
-		0 as æ ‡å‡†å•ä»·,
-		0 as æŸè€—é‡‘é¢
+SELECT LT0.ÈÎÎñºÅ as ÈÎÎñºÅ,LT00.²úÆ·±àÂë as ²úÆ·±àÂë,LT00.²úÆ·Ãû³Æ as ²úÆ·Ãû³Æ,LT00.²úÆ·¹æ¸ñ as ²úÆ·¹æ¸ñ,LT1.ÁìÓÃÔ­ÁÏÖØÁ¿ as ÁìÓÃÔ­ÁÏÖØÁ¿,LT00.Ã÷Ï¸Èë¿âÖØÁ¿ as Ã÷Ï¸Èë¿âÖØÁ¿,LT0.²ú³öÈë¿âÖØÁ¿ as ²ú³öÈë¿âÖØÁ¿,LT0.Ò»´ÎÍ¨¹ıÖØÁ¿ as Ò»´ÎÍ¨¹ıÖØÁ¿,
+			(LT1.ÁìÓÃÔ­ÁÏÖØÁ¿-LT0.²ú³öÈë¿âÖØÁ¿) as ËğºÄÖØÁ¿, CAST((cast(LT0.²ú³öÈë¿âÖØÁ¿/LT1.ÁìÓÃÔ­ÁÏÖØÁ¿ as decimal(20,6))*100) as decimal(20,2)) as ³ö³ÉÂÊ,
+			isnull(CAST((1-CAST(((LT0.²ú³öÈë¿âÖØÁ¿/LT1.ÁìÓÃÔ­ÁÏÖØÁ¿)) as decimal(20,6)))*100 as decimal(20,2)),0) as ËğºÄÂÊ,
+			isnull(LT2.ºÏÀíËğºÄÉÏÏŞ,0) as ºÏÀíËğºÄÉÏÏŞ,isnull(LT2.ºÏÀíËğºÄÏÂÏŞ,0) as ºÏÀíËğºÄÏÂÏŞ,
+			'' as ½á¹û,0 as ³¬±ê×¼ËğºÄÖØÁ¿,CAST(((LT0.Ò»´ÎÍ¨¹ıÖØÁ¿/LT1.ÁìÓÃÔ­ÁÏÖØÁ¿)*100) as decimal(20,2)) as Ò»´ÎÍ¨¹ıÂÊ,
+		0 as ±ê×¼µ¥¼Û,
+		0 as ËğºÄ½ğ¶î
 FROM (
-select #FlyTable00.ä»»åŠ¡å· as ä»»åŠ¡å·,#FlyTable00.äº§å“ç¼–ç  as äº§å“ç¼–ç ,#FlyTable00.äº§å“åç§° as äº§å“åç§°,#FlyTable00.äº§å“è§„æ ¼ as äº§å“è§„æ ¼,
-sum(#FlyTable00.äº§å‡ºå…¥åº“é‡é‡) over(partition by #FlyTable00.ä»»åŠ¡å·,#FlyTable00.äº§å“ç¼–ç  ,#FlyTable00.äº§å“åç§°,#FlyTable00.äº§å“è§„æ ¼) as æ˜ç»†å…¥åº“é‡é‡,
-sum(#FlyTable00.äº§å‡ºå…¥åº“é‡é‡) over(partition by #FlyTable00.ä»»åŠ¡å·) as äº§å‡ºå…¥åº“é‡é‡,
-sum(#FlyTable00.ä¸€æ¬¡é€šè¿‡é‡é‡) over(partition by #FlyTable00.ä»»åŠ¡å·) as ä¸€æ¬¡é€šè¿‡é‡é‡
+select #FlyTable00.ÈÎÎñºÅ as ÈÎÎñºÅ,--#FlyTable00.²úÆ·±àÂë as ²úÆ·±àÂë,#FlyTable00.²úÆ·Ãû³Æ as ²úÆ·Ãû³Æ,#FlyTable00.²úÆ·¹æ¸ñ as ²úÆ·¹æ¸ñ,
+--sum(#FlyTable00.²ú³öÈë¿âÖØÁ¿)  as Ã÷Ï¸Èë¿âÖØÁ¿,
+sum(#FlyTable00.²ú³öÈë¿âÖØÁ¿)  as ²ú³öÈë¿âÖØÁ¿,
+sum(#FlyTable00.Ò»´ÎÍ¨¹ıÖØÁ¿)  as Ò»´ÎÍ¨¹ıÖØÁ¿
 from #FlyTable00 
---group by #FlyTable00.ä»»åŠ¡å·,#FlyTable00.äº§å“ç¼–ç  ,#FlyTable00.äº§å“åç§°,#FlyTable00.äº§å“è§„æ ¼
+group by #FlyTable00.ÈÎÎñºÅ--,#FlyTable00.²úÆ·±àÂë ,#FlyTable00.²úÆ·Ãû³Æ,#FlyTable00.²úÆ·¹æ¸ñ
 ) AS LT0
+LEFT JOIN(
+select #FlyTable00.ÈÎÎñºÅ as ÈÎÎñºÅ,#FlyTable00.²úÆ·±àÂë as ²úÆ·±àÂë,#FlyTable00.²úÆ·Ãû³Æ as ²úÆ·Ãû³Æ,#FlyTable00.²úÆ·¹æ¸ñ as ²úÆ·¹æ¸ñ,
+sum(#FlyTable00.²ú³öÈë¿âÖØÁ¿)  as Ã÷Ï¸Èë¿âÖØÁ¿--,
+--sum(#FlyTable00.²ú³öÈë¿âÖØÁ¿)  as ²ú³öÈë¿âÖØÁ¿,
+--sum(#FlyTable00.Ò»´ÎÍ¨¹ıÖØÁ¿)  as Ò»´ÎÍ¨¹ıÖØÁ¿
+from #FlyTable00 
+group by #FlyTable00.ÈÎÎñºÅ,#FlyTable00.²úÆ·±àÂë ,#FlyTable00.²úÆ·Ãû³Æ,#FlyTable00.²úÆ·¹æ¸ñ
+) AS LT00 ON LT0.ÈÎÎñºÅ = LT00.ÈÎÎñºÅ
 left join (
-select #FlyTable01.ä»»åŠ¡å· as ä»»åŠ¡å·,
-sum(#FlyTable01.é¢†ç”¨åŸæ–™é‡é‡) as é¢†ç”¨åŸæ–™é‡é‡
+select #FlyTable01.ÈÎÎñºÅ as ÈÎÎñºÅ,
+sum(#FlyTable01.ÁìÓÃÔ­ÁÏÖØÁ¿) as ÁìÓÃÔ­ÁÏÖØÁ¿
 from #FlyTable01 
-group by #FlyTable01.ä»»åŠ¡å·) AS LT1 ON LT0.ä»»åŠ¡å· = LT1.ä»»åŠ¡å·
+group by #FlyTable01.ÈÎÎñºÅ) AS LT1 ON LT0.ÈÎÎñºÅ = LT1.ÈÎÎñºÅ
 left join (
-select #FlyTable011.ä»»åŠ¡å· as ä»»åŠ¡å·,
-max(#FlyTable011.åˆç†æŸè€—ä¸Šé™) as åˆç†æŸè€—ä¸Šé™,
-max(#FlyTable011.åˆç†æŸè€—ä¸‹é™) as åˆç†æŸè€—ä¸‹é™
+select #FlyTable011.ÈÎÎñºÅ as ÈÎÎñºÅ,
+max(#FlyTable011.ºÏÀíËğºÄÉÏÏŞ) as ºÏÀíËğºÄÉÏÏŞ,
+max(#FlyTable011.ºÏÀíËğºÄÏÂÏŞ) as ºÏÀíËğºÄÏÂÏŞ
 from #FlyTable011
-group by #FlyTable011.ä»»åŠ¡å·) AS LT2 ON LT0.ä»»åŠ¡å· = LT2.ä»»åŠ¡å·
-where LT1.é¢†ç”¨åŸæ–™é‡é‡ <> 0
+group by #FlyTable011.ÈÎÎñºÅ) AS LT2 ON LT0.ÈÎÎñºÅ = LT2.ÈÎÎñºÅ
+where LT1.ÁìÓÃÔ­ÁÏÖØÁ¿ <> 0
 
 
---ä¸­é—´è®¡ç®—ç»“æŸ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--ÖĞ¼ä¼ÆËã½áÊø------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 select distinct
-	ä»»åŠ¡å·,
-äº§å“ç¼–ç ,äº§å“åç§°,äº§å“è§„æ ¼,
-	é¢†ç”¨åŸæ–™é‡é‡,
-	æ˜ç»†å…¥åº“é‡é‡,
-	äº§å‡ºå…¥åº“é‡é‡,
-	æŸè€—é‡é‡,
-	å‡ºæˆç‡,
-	æŸè€—ç‡,
-  åˆç†æŸè€—ä¸Šé™,
-	åˆç†æŸè€—ä¸‹é™,
+	ÈÎÎñºÅ,
+²úÆ·±àÂë,²úÆ·Ãû³Æ,²úÆ·¹æ¸ñ,
+	ÁìÓÃÔ­ÁÏÖØÁ¿,
+	Ã÷Ï¸Èë¿âÖØÁ¿,
+	²ú³öÈë¿âÖØÁ¿,
+	ËğºÄÖØÁ¿,
+	³ö³ÉÂÊ,
+	ËğºÄÂÊ,
+  ºÏÀíËğºÄÉÏÏŞ,
+	ºÏÀíËğºÄÏÂÏŞ,
 	(case
-		when (æŸè€—ç‡ <= åˆç†æŸè€—ä¸Šé™ AND æŸè€—ç‡ >= åˆç†æŸè€—ä¸‹é™) then 'åˆç†'
-		when (æŸè€—ç‡ < åˆç†æŸè€—ä¸‹é™) then 'èŠ‚çº¦'
-		when (æŸè€—ç‡ > åˆç†æŸè€—ä¸Šé™) then 'æµªè´¹'
-	end) as ç»“æœ,
+		when (ËğºÄÂÊ <= ºÏÀíËğºÄÉÏÏŞ AND ËğºÄÂÊ >= ºÏÀíËğºÄÏÂÏŞ) then 'ºÏÀí'
+		when (ËğºÄÂÊ < ºÏÀíËğºÄÏÂÏŞ) then '½ÚÔ¼'
+		when (ËğºÄÂÊ > ºÏÀíËğºÄÉÏÏŞ) then 'ÀË·Ñ'
+	end) as ½á¹û,
 	(case
-		when (æŸè€—ç‡ <= åˆç†æŸè€—ä¸Šé™ AND æŸè€—ç‡ >= åˆç†æŸè€—ä¸‹é™) then 0
-		when (æŸè€—ç‡ < åˆç†æŸè€—ä¸‹é™) then (æŸè€—é‡é‡-(äº§å‡ºå…¥åº“é‡é‡*(åˆç†æŸè€—ä¸‹é™/100)))
-		when (æŸè€—ç‡ > åˆç†æŸè€—ä¸Šé™) then (æŸè€—é‡é‡-(äº§å‡ºå…¥åº“é‡é‡*(åˆç†æŸè€—ä¸Šé™/100)))
-	end) as è¶…æ ‡å‡†æŸè€—é‡é‡,
-	ä¸€æ¬¡é€šè¿‡ç‡,
-	æ ‡å‡†å•ä»·,
+		when (ËğºÄÂÊ <= ºÏÀíËğºÄÉÏÏŞ AND ËğºÄÂÊ >= ºÏÀíËğºÄÏÂÏŞ) then 0
+		when (ËğºÄÂÊ < ºÏÀíËğºÄÏÂÏŞ) then (ËğºÄÖØÁ¿-(²ú³öÈë¿âÖØÁ¿*(ºÏÀíËğºÄÏÂÏŞ/100)))
+		when (ËğºÄÂÊ > ºÏÀíËğºÄÉÏÏŞ) then (ËğºÄÖØÁ¿-(²ú³öÈë¿âÖØÁ¿*(ºÏÀíËğºÄÉÏÏŞ/100)))
+	end) as ³¬±ê×¼ËğºÄÖØÁ¿,
+	Ò»´ÎÍ¨¹ıÂÊ,
+	±ê×¼µ¥¼Û,
 	(case
-		when (æŸè€—ç‡ <= åˆç†æŸè€—ä¸Šé™ AND æŸè€—ç‡ >= åˆç†æŸè€—ä¸‹é™) then 0
-		when (æŸè€—ç‡ < åˆç†æŸè€—ä¸‹é™) then ((æŸè€—é‡é‡-(äº§å‡ºå…¥åº“é‡é‡*(åˆç†æŸè€—ä¸‹é™/100)))*æ ‡å‡†å•ä»·)
-		when (æŸè€—ç‡ > åˆç†æŸè€—ä¸Šé™) then ((æŸè€—é‡é‡-(äº§å‡ºå…¥åº“é‡é‡*(åˆç†æŸè€—ä¸Šé™/100)))*æ ‡å‡†å•ä»·)
-	end) as æŸè€—é‡‘é¢
+		when (ËğºÄÂÊ <= ºÏÀíËğºÄÉÏÏŞ AND ËğºÄÂÊ >= ºÏÀíËğºÄÏÂÏŞ) then 0
+		when (ËğºÄÂÊ < ºÏÀíËğºÄÏÂÏŞ) then ((ËğºÄÖØÁ¿-(²ú³öÈë¿âÖØÁ¿*(ºÏÀíËğºÄÏÂÏŞ/100)))*±ê×¼µ¥¼Û)
+		when (ËğºÄÂÊ > ºÏÀíËğºÄÉÏÏŞ) then ((ËğºÄÖØÁ¿-(²ú³öÈë¿âÖØÁ¿*(ºÏÀíËğºÄÉÏÏŞ/100)))*±ê×¼µ¥¼Û)
+	end) as ËğºÄ½ğ¶î
 from #FlyTable02
-where é¢†ç”¨åŸæ–™é‡é‡ is not NULL
+where ÁìÓÃÔ­ÁÏÖØÁ¿ is not NULL
 drop table #FlyTable0
 drop table #FlyTable00
 drop table #FlyTable01
@@ -178,10 +182,3 @@ drop table #FlyTable011
 drop table #FlyTable02
 
 END
-
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON 
-GO
-

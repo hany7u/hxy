@@ -95,14 +95,16 @@ BEGIN
 	--查询产品入库数据开始-------------------------
 	insert into #FlyTable00 select
 				rdrecords10.cdefine22 as 任务号,
-				/*Inventory.cInvCode as 产品编码,
+				Inventory.cInvCode as 产品编码,
 				Inventory.cInvName as 产品名称,
-				Inventory.cInvStd as 规格型号,*/
+				Inventory.cInvStd as 规格型号,
 				rdrecords10.iquantity as 产出入库数量
 				from rdrecords10
 				Left JOIN rdrecord10 ON rdrecords10.ID = rdrecord10.ID
 				Left JOIN Inventory ON rdrecords10.cInvCode = Inventory.cInvCode
-				where (rdrecords10.cdefine22 in (select 任务号 from #FlyTable0 ) and (Inventory.cInvCode like '05%' or Inventory.cInvCode like '07%')) 
+				where (rdrecords10.cdefine22 in (select 任务号 from #FlyTable0 ) 
+							and rdrecord10.cWhCode <> '59' and rdrecord10.cWhCode <> '23' and rdrecord10.cWhCode <> '07' 
+							and ((Inventory.cInvCode like '05%' and Inventory.cInvCode not like '059%') or Inventory.cInvCode like '07%')) 
 	--查询产品入库数据结束--------	
 	--查询材料出库数据开始--------
 	insert into #FlyTable01 select
@@ -136,7 +138,7 @@ BEGIN
 				
 	--查询任务单号对应的合理损耗上下限结束
 	--查询结果表开始
-	select t0.任务号 as 任务号,T1.产品编码 as 产品编码,T1.产品名称 as 产品名称,T1.规格型号 as 产品规格, T11.材料编码 as 材料编码,T11.材料名称 as 材料名称,T11.规格型号 as 规格型号,T11.计量单位 as 计量单位,
+	select t0.任务号 as 任务号,T10.产品编码 as 产品编码,T10.产品名称 as 产品名称,T10.规格型号 as 产品规格, T11.材料编码 as 材料编码,T11.材料名称 as 材料名称,T11.规格型号 as 规格型号,T11.计量单位 as 计量单位,
 			T1.产出入库数量 as 产出入库数量,T11.实际消耗数量 as 实际消耗数量,T2.合理损耗上限 AS 合理损耗上限,T2.合理损耗下限 AS 合理损耗下限,
 			cast(T2.基本用量 as decimal(20,4)) AS 基本用量,cast(T2.基础数量 as decimal(20,4)) AS 基础数量,
 			case when cast(T2.基础数量 as decimal(20,6))<>0  then cast(T1.产出入库数量*T2.基本用量/T2.基础数量 as decimal(20,2)) end  as 标准消耗数量,
@@ -161,9 +163,13 @@ BEGIN
 		,'-' as 基准价格
 		,'-' as 超标准损耗金额
 	from(select DISTINCT #FlyTable0.任务号 AS 任务号 from #FlyTable0) as T0
-	left join (select DISTINCT #FlyTable00.任务号 as 任务号/*,#FlyTable00.产品编码 as 产品编码,#FlyTable00.产品名称 as 产品名称,#FlyTable00.规格型号 as 规格型号*/,sum(#FlyTable00.产出入库数量) as 产出入库数量 
+	left join (select DISTINCT #FlyTable00.任务号 as 任务号,#FlyTable00.产品编码 as 产品编码,#FlyTable00.产品名称 as 产品名称,#FlyTable00.规格型号 as 规格型号
 				from #FlyTable00
-				group by #FlyTable00.任务号--,#FlyTable00.产品编码,#FlyTable00.产品名称,#FlyTable00.规格型号
+				
+			) as T10 on T0.任务号 = T10.任务号
+	left join (select DISTINCT #FlyTable00.任务号 as 任务号,sum(#FlyTable00.产出入库数量) as 产出入库数量 
+				from #FlyTable00
+				group by #FlyTable00.任务号
 			) as T1 on T0.任务号 = T1.任务号
 	left join (select DISTINCT #FlyTable01.任务号 as 任务号,#FlyTable01.材料编码 as 材料编码,#FlyTable01.材料名称 as 材料名称,
 					#FlyTable01.规格型号 as 规格型号,#FlyTable01.计量单位 as 计量单位,SUM(#FlyTable01.实际消耗数量) as 实际消耗数量 
@@ -187,5 +193,3 @@ BEGIN
 	drop table #FlyTable01
 	drop table #FlyTable010
 END
-
-

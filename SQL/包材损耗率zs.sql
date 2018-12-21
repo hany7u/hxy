@@ -43,6 +43,29 @@ BEGIN
 		,计量单位 varchar(50)
 		,实际消耗数量 decimal(26, 6)
 		)
+	create table #base00 (
+		任务号 varchar(50)
+		,产品编码 varchar(50)
+		,产品名称 varchar(50)
+		,产品规格 varchar(50)
+		,材料编码 varchar(50)
+		,材料名称 varchar(50)
+		,规格型号 varchar(50)
+		,计量单位 varchar(50)
+		,产出入库数量 decimal(26, 6)
+		,实际消耗数量 decimal(26, 6)
+		,合理损耗上限 decimal(26, 6)
+		,合理损耗下限 decimal(26, 6)
+		,基本用量 decimal(26, 6)
+		,基础数量 decimal(26, 6)
+		,标准消耗数量 decimal(26, 6)
+		,损耗数量 decimal(26, 6)
+		,损耗率 decimal(26, 6)
+		,结果 varchar(10)
+		,超标准损耗数量 decimal(26, 6)
+		,基准价格 decimal(26, 6)
+		,超标准损耗金额 decimal(26, 6)
+		)
 	--查询任务号开始
 	if (isnull(@weiDu, 0) = 0)
 	begin --维度是按任务号统计↓
@@ -145,8 +168,8 @@ BEGIN
 				where Inventory.cInvCCode like '02%' and rdrecord11.cDefine1 in (select 任务号 from #FlyTable0 ) and rdrecords11.cdefine25 is not null
 				
 	--查询任务单号对应的合理损耗上下限结束
-	--查询结果表开始
-	select t0.任务号 as 任务号,T10.产品编码 as 产品编码,T10.产品名称 as 产品名称,T10.规格型号 as 产品规格, T11.材料编码 as 材料编码,T11.材料名称 as 材料名称,T11.规格型号 as 规格型号,T11.计量单位 as 计量单位,
+	--组装基础表开始
+	INSERT INTO #base00 select t0.任务号 as 任务号,T10.产品编码 as 产品编码,T10.产品名称 as 产品名称,T10.规格型号 as 产品规格, T11.材料编码 as 材料编码,T11.材料名称 as 材料名称,T11.规格型号 as 规格型号,T11.计量单位 as 计量单位,
 			T1.产出入库数量 as 产出入库数量,T11.实际消耗数量 as 实际消耗数量,T2.合理损耗上限 AS 合理损耗上限,T2.合理损耗下限 AS 合理损耗下限,
 			cast(T2.基本用量 as decimal(20,4)) AS 基本用量,cast(T2.基础数量 as decimal(20,4)) AS 基础数量,
 			case when cast(T2.基础数量 as decimal(20,6))<>0  then cast(T1.产出入库数量*T2.基本用量/T2.基础数量 as decimal(20,2)) end  as 标准消耗数量,
@@ -168,8 +191,8 @@ BEGIN
 				when cast(T2.基础数量 as decimal(20,6))<>0 and cast(T11.实际消耗数量 as decimal(20,6))<>0 and cast(((T11.实际消耗数量-cast(T1.产出入库数量*T2.基本用量/T2.基础数量 as decimal(20,6)))/T11.实际消耗数量) as decimal(20,6)) < T2.合理损耗下限
 					then cast((cast(T11.实际消耗数量-cast(T1.产出入库数量*T2.基本用量/T2.基础数量 as decimal(20,6)) as decimal(20,6))-cast(T1.产出入库数量*T2.基本用量/T2.基础数量*T2.合理损耗下限 as decimal(20,6))) as decimal(20,2))
 			end as 超标准损耗数量
-		,'-' as 基准价格
-		,'-' as 超标准损耗金额
+		,0 as 基准价格
+		,0 as 超标准损耗金额
 	from(select DISTINCT #FlyTable0.任务号 AS 任务号 from #FlyTable0) as T0
 	left join (select DISTINCT #FlyTable00.任务号 as 任务号,#FlyTable00.产品编码 as 产品编码,#FlyTable00.产品名称 as 产品名称,#FlyTable00.规格型号 as 规格型号
 				from #FlyTable00
@@ -195,11 +218,12 @@ BEGIN
 				
 			) as T2 on T11.任务号 = T2.任务号 AND T11.材料编码 = T2.材料编码 
 	where T11.材料编码 is not null
-	--查询结果表结束
+	--组装基础表结束
 	drop table #FlyTable0
 	drop table #FlyTable00
 	drop table #FlyTable01
 	drop table #FlyTable010
+	DROP table #base00
 END
 
 

@@ -191,8 +191,15 @@ BEGIN
 				when cast(T2.基础数量 as decimal(20,6))<>0 and cast(T11.实际消耗数量 as decimal(20,6))<>0 and cast(((T11.实际消耗数量-cast(T1.产出入库数量*T2.基本用量/T2.基础数量 as decimal(20,6)))/T11.实际消耗数量) as decimal(20,6)) < T2.合理损耗下限
 					then cast((cast(T11.实际消耗数量-cast(T1.产出入库数量*T2.基本用量/T2.基础数量 as decimal(20,6)) as decimal(20,6))-cast(T1.产出入库数量*T2.基本用量/T2.基础数量*T2.合理损耗下限 as decimal(20,6))) as decimal(20,2))
 			end as 超标准损耗数量
-		,0 as 基准价格
-		,0 as 超标准损耗金额
+		,dj.结存单价 as 基准价格
+		,case 
+				when cast(T2.基础数量 as decimal(20,6))<>0 and cast(T11.实际消耗数量 as decimal(20,6))<>0 and cast(((T11.实际消耗数量-cast(T1.产出入库数量*T2.基本用量/T2.基础数量 as decimal(20,6)))/T11.实际消耗数量) as decimal(20,6)) >= T2.合理损耗下限 and cast(((T11.实际消耗数量-cast(T1.产出入库数量*T2.基本用量/T2.基础数量 as decimal(20,6)))/T11.实际消耗数量) as decimal(20,6)) <= T2.合理损耗上限
+					then 0.00
+				when cast(T2.基础数量 as decimal(20,6))<>0 and cast(T11.实际消耗数量 as decimal(20,6))<>0 and cast(((T11.实际消耗数量-cast(T1.产出入库数量*T2.基本用量/T2.基础数量 as decimal(20,6)))/T11.实际消耗数量) as decimal(20,6)) > T2.合理损耗上限
+					then dj.结存单价*cast((cast(T11.实际消耗数量-cast(T1.产出入库数量*T2.基本用量/T2.基础数量 as decimal(20,6)) as decimal(20,6))-cast(T1.产出入库数量*T2.基本用量/T2.基础数量*T2.合理损耗上限 as decimal(20,6))) as decimal(20,2))
+				when cast(T2.基础数量 as decimal(20,6))<>0 and cast(T11.实际消耗数量 as decimal(20,6))<>0 and cast(((T11.实际消耗数量-cast(T1.产出入库数量*T2.基本用量/T2.基础数量 as decimal(20,6)))/T11.实际消耗数量) as decimal(20,6)) < T2.合理损耗下限
+					then dj.结存单价*cast((cast(T11.实际消耗数量-cast(T1.产出入库数量*T2.基本用量/T2.基础数量 as decimal(20,6)) as decimal(20,6))-cast(T1.产出入库数量*T2.基本用量/T2.基础数量*T2.合理损耗下限 as decimal(20,6))) as decimal(20,2))
+			end as 超标准损耗金额
 	from(select DISTINCT #FlyTable0.任务号 AS 任务号 from #FlyTable0) as T0
 	left join (select DISTINCT #FlyTable00.任务号 as 任务号,#FlyTable00.产品编码 as 产品编码,#FlyTable00.产品名称 as 产品名称,#FlyTable00.规格型号 as 规格型号
 				from #FlyTable00
@@ -216,17 +223,89 @@ BEGIN
 				
 				group by #FlyTable010.任务号,#FlyTable010.材料编码 
 				
-			) as T2 on T11.任务号 = T2.任务号 AND T11.材料编码 = T2.材料编码 
+			) as T2 on T11.任务号 = T2.任务号 AND T11.材料编码 = T2.材料编码
+	/*关联单价开始*/		
+	left join (SELECT t2.仓库编码 AS 仓库编码,t2.存货编码 AS 存货编码,t2.部门编码 AS 部门编码,t2.会计年度 AS 会计年度,t2.会计期间 AS 				会计期间,t2.结存数量 AS 结存数量,t2.结存金额 as 结存金额,CAST(t2.结存金额/t2.结存数量 as DECIMAL(16,6)) as 结存单价
+			from (SELECT t.cWhCode AS 仓库编码,t.cInvCode AS 存货编码,t.cDepCode AS 部门编码,max(t.AutoID) AS AutoID
+					FROM IA_Summary AS t
+					GROUP BY t.cWhCode ,t.cInvCode ,t.cDepCode 
+			) as t1
+			LEFT JOIN (SELECT t.AutoID as AutoID,t.cWhCode AS 仓库编码,	t.cInvCode AS 存货编码,t.cDepCode AS 部门编码,t.iYear AS 会计年度,t.iMonth AS 会计期间,	t.iNum AS 结存数量,	t.iMoney as 结存金额
+					FROM			IA_Summary AS t 
+			) as t2 on t1.AutoID = t2.AutoID 
+			WHERE t2.结存数量 <>0
+			)as dj on T11.材料编码 = dj.存货编码
+	/*关联单价结束*/
 	where T11.材料编码 is not null
 	--组装基础表结束
+	SELECT 1 as 汇总标识/*汇总数据，不包含汇总和不大于零的*/
+		,'' as 任务号
+		,'' as 产品编码
+		,'' as 产品名称
+		,'' as 产品规格
+		,item.材料编码 as 材料编码
+		,item.材料名称 as 材料名称
+		,item.规格型号 as 规格型号
+		,item.计量单位 as 计量单位
+		,max(item.基本用量) as 基本用量
+		,max(item.基础数量) as 基础数量
+		,sum(item.产出入库数量) as 产出入库数量
+		,sum(item.实际消耗数量) as 实际消耗数量
+		,max(item.合理损耗上限) as 合理损耗上限
+		,min(item.合理损耗下限) as 合理损耗下限
+		,sum(item.标准消耗数量) as 标准消耗数量
+		,sum(item.损耗数量) as 损耗数量
+		,cast(sum(item.损耗数量)/sum(item.实际消耗数量) as decimal(20,6)) as 损耗率
+		,case when sum(item.实际消耗数量)<>0 and  cast(sum(item.损耗数量)/sum(item.实际消耗数量) as decimal(20,6))>max(item.合理损耗上限) then '浪费' 
+			when sum(item.实际消耗数量)<>0 and cast(sum(item.损耗数量)/sum(item.实际消耗数量) as decimal(20,6))<min(item.合理损耗下限) then '节约'
+			else ''
+		end as 结果
+		,case when sum(item.实际消耗数量)<>0 and cast(sum(item.损耗数量)/sum(item.实际消耗数量) as decimal(20,6))>max(item.合理损耗上限) 
+				then sum(item.实际消耗数量)- sum(item.标准消耗数量)
+			when sum(item.实际消耗数量)<>0 and cast(sum(item.损耗数量)/sum(item.实际消耗数量) as decimal(20,6))<min(item.合理损耗下限) 
+				then sum(item.标准消耗数量)- sum(item.实际消耗数量)
+			else 0
+		end as 超标准损耗数量
+		,avg(item.基准价格) as 基准价格
+		,sum(item.超标准损耗金额) as 超标准损耗金额 
+		from #base00 as item
+		--where sum(item.实际消耗数量) <> 0
+		group by item.材料编码 ,item.材料名称,item.规格型号,item.计量单位
+		having sum(item.实际消耗数量) > 0
+union ALL		
+		SELECT 0 as 汇总标识/*明细数据*/
+		,item.任务号 as 任务号
+		,item.产品编码 as 产品编码
+		,item.产品名称 as 产品名称
+		,item.产品规格 as 产品规格
+		,item.材料编码 as 材料编码
+		,item.材料名称 as 材料名称
+		,item.规格型号 as 规格型号
+		,item.计量单位 as 计量单位
+		,item.基本用量 as 基本用量
+		,item.基础数量 as 基础数量
+		,item.产出入库数量 as 产出入库数量
+		,item.实际消耗数量 as 实际消耗数量
+		,item.合理损耗上限 as 合理损耗上限
+		,item.合理损耗下限 as 合理损耗下限
+		,item.标准消耗数量 as 标准消耗数量
+		,item.损耗数量 as 损耗数量
+		,item.损耗率 as 损耗率
+		,item.结果 as 结果
+		,item.超标准损耗数量 as 超标准损耗数量
+		,item.基准价格 as 基准价格
+		,item.超标准损耗金额 as 超标准损耗金额 
+		from #base00 as item
+		
+
+
 	drop table #FlyTable0
 	drop table #FlyTable00
 	drop table #FlyTable01
 	drop table #FlyTable010
 	DROP table #base00
+
 END
-
-
 
 GO
 SET QUOTED_IDENTIFIER OFF 

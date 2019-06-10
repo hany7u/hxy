@@ -1,0 +1,1 @@
+$Error->iif(ctrantypeid=='1001B31000000001D18R',"",iif(ctrantypeid=='1001B310000000018R7Y',"",iif(ctrantypeid=='1001B31000000002X216',"","出口订单不允许选择此订单类型！")))

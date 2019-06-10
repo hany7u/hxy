@@ -258,7 +258,7 @@ BEGIN
 		,cast(sum(item.损耗数量)/sum(item.实际消耗数量) as decimal(20,6)) as 损耗率
 		,case when sum(item.实际消耗数量)<>0 and  cast(sum(item.损耗数量)/sum(item.实际消耗数量) as decimal(20,6))>max(item.合理损耗上限) then '浪费' 
 			when sum(item.实际消耗数量)<>0 and cast(sum(item.损耗数量)/sum(item.实际消耗数量) as decimal(20,6))<min(item.合理损耗下限) then '节约'
-			else ''
+			else '合理'
 		end as 结果
 		,case when sum(item.实际消耗数量)<>0 and cast(sum(item.损耗数量)/sum(item.实际消耗数量) as decimal(20,6))>max(item.合理损耗上限) 
 				then sum(item.实际消耗数量)- sum(item.标准消耗数量)
